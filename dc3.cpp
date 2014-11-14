@@ -11,9 +11,9 @@ inline bool leq(int a1, int a2, int a3, int b1, int b2, int b3) {
 }
 
 // stably sort a[0..n-1] to b[0..n-1] with keys in 0..K-1 in r[]
-static void radixPass(const int* a, int* b, const int* r, int n, int K)
-{ // count occurrences
-    int* c = new int[K + 1];                        // counter array
+static void radixPass(const int *a, int *b, const int *r, int n, int K) {
+    // count occurrences
+    int *c = new int[K + 1];                        // counter array
     for (int i = 0; i <= K; i++) c[i] = 0;          // reset counters
     for (int i = 0; i < n; i++) c[r[a[i]]]++;       // c[k] <- #occurrences of r[k]  in a[]
     for (int i = 0, sum = 0; i <= K; i++) {         // exclusive prefix sums

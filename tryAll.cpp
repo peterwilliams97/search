@@ -1,4 +1,7 @@
 #include <iostream>
+#include <map>
+#include <vector>
+#include <algorithm>
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
@@ -60,7 +63,6 @@ test_one(const int *s, int *SA, int *lcp, int n, int b, bool do_check=false) {
     suffixArrayLcp(s, SA, lcp, n, b);
     double duration = (double)(clock() - start) / CLOCKS_PER_SEC;
 
-
     if (do_check) {
         Assert0(s[n] == 0);
         Assert0(s[n + 1] == 0);
@@ -69,6 +71,7 @@ test_one(const int *s, int *SA, int *lcp, int n, int b, bool do_check=false) {
         Assert0(isPermutation(SA, n));
         Assert0(isSorted(SA, s, n));
         Debug1(printV(SA, n, "SA"));
+        Debug1(printV(lcp, n, "lcp"));
     }
 
     return duration;
@@ -96,6 +99,48 @@ test_n_b(int n, int b) {
     delete[] lcp;
 
     return duration;
+}
+
+void 
+test_sa(const char *text) {
+    int n = (int)strlen(text);
+    int k = 0;
+    map<char, int> char_int;
+    vector<char> chars;
+
+    for (const char *t = text; *t; t++) {
+        if (find(chars.begin(), chars.end(), *t) != chars.end()) {
+            continue;
+        }
+        chars.push_back(*t);
+    }
+
+    k = (int)chars.size();
+    sort(chars.begin(), chars.end());
+
+    for (int i = 0; i < k; i++) {
+        char_int[chars[i]] = i;
+    }
+
+    int *s = new int[n + 3];
+    int *sa = new int[n + 3];
+    int *lcp = new int[n + 3];
+
+    for (int i = 0; i < n + 3; i++) {
+        s[i] = sa[i] = lcp[i] = 0;
+    }
+
+    for (int i = 0; i < n; i++) {
+        s[i] = char_int[text[i]];
+    }
+
+    test_one(s, sa, lcp, n, k, true);
+    cout << "Done: " << text << endl;
+}
+
+void 
+banana() {
+    test_sa("banana");
 }
 
 void 
@@ -133,6 +178,8 @@ int main(int argc, char **argv) {
     //int n = 8;
     //int s1[] = {2,1,3,1,3,1,0,0,0}; // banana
     //int s2[] = {0,0,0,0,0,0,0,0,0};
+
+    banana();
 
     int n, b;
     b = 256;
