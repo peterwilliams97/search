@@ -115,7 +115,6 @@ void suffixArray(const int *s, int *SA, int n, int K) {
     delete[] s0;
 }
 
-
 void calc_lcp(const int *s, const int *sa, int *lcp, int n) {
     int *rank = new int[n];
 

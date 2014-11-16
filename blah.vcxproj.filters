@@ -21,5 +21,14 @@
     <ClCompile Include="tryAll.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="lca.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="util.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sa.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -142,7 +142,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="dc3.cpp" />
+    <ClCompile Include="lca.cpp" />
+    <ClCompile Include="sa.cpp" />
     <ClCompile Include="tryAll.cpp" />
+    <ClCompile Include="util.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

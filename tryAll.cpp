@@ -11,18 +11,9 @@ using namespace std;
 
 void suffixArray(const int *s, int *SA, int n, int K);
 void suffixArrayLcp(const int *s, int *SA, int *lcp, int n, int K);
+bool test_rmq();
 
-int min(int a, int b) {
-    return a < b ? a : b;
-}
 
-void printV(const int *a, int n, const char *comment) {
-    cout << comment << ": n= " << n << " : ";
-    for (int i = 0; i < min(n, 20); i++) {
-        cout << a[i] << " ";
-    }
-    cout << endl;
-}
 
 bool isPermutation(const int *SA, int n) {
     bool *seen = new bool[n];
@@ -38,7 +29,7 @@ bool sleq(const int *s1, const int *s2) {
     if (s1[0] > s2[0]) return 0;
     return sleq(s1 + 1, s2 + 1);
 #else
-    for (int i = 0;; i++) {
+    for (int i = 0; ; i++) {
         if (s1[i] < s2[i]) return 1;
         if (s1[i] > s2[i]) return 0;
     }
@@ -46,11 +37,14 @@ bool sleq(const int *s1, const int *s2) {
 }
 
 // is SA a sorted suffix array for s?
-bool isSorted(const int *SA, const int *s, int n) {
+bool 
+isSorted(const int *SA, const int *s, int n) {
     for (int i = 0; i < n - 1; i++) {
-        if (!sleq(s + SA[i], s + SA[i + 1])) return 0;
+        if (!sleq(s + SA[i], s + SA[i + 1])) {
+            return false;
+        }
     }
-    return 1;
+    return true;
 }
 
 double 
@@ -153,7 +147,10 @@ test_n_all_b(int n, int b) {
     for (int i = 0; i < n; i++) {
         lcp[i] = s[i] = SA[i] = -1;
     }
-    s[n] = s[n + 1] = s[n + 2] = SA[n] = SA[n + 1] = SA[n + 2] = 0;
+    for (int i = n; i < n + 3 ; i++) {
+        lcp[i] = s[i] = SA[i] = 0;
+    }
+
     for (int j = 0; j < N; j++) {
         test_one(s, SA, lcp, n, b);
 
@@ -179,6 +176,9 @@ int main(int argc, char **argv) {
     //int s1[] = {2,1,3,1,3,1,0,0,0}; // banana
     //int s2[] = {0,0,0,0,0,0,0,0,0};
 
+    test_rmq();
+
+#if 0
     banana();
 
     int n, b;
@@ -195,6 +195,7 @@ int main(int argc, char **argv) {
             cout << "n/sec = " << rate << endl;
         }
     }
+#endif
 
 #if 0
     int nmax = atoi(argv[1]);

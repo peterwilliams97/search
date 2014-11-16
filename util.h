@@ -53,10 +53,7 @@
 #define Debug6(A) 
 #endif
 
-inline  void __assert(const char *file, int line) {
-    cerr << "\nAssertion violation " << __FILE__ << ":" << __LINE__ << endl;
-}
-
+void __assert(const char *file, int line);
 #define Assert(c) if (!(c)) __assert(__FILE__, __LINE__)
 
 #define Assert0(C) Debug0(Assert(C))
@@ -106,5 +103,26 @@ inline double cpuTime()
     //  clock_gettime(CLOCK_VIRTUAL, &tp);
     //  return tp.tv_sec + tp.tv_nsec * 1e-9;
 }
+
+/*/
+#ifdef _WIN32
+double log2(double x) {
+    return log(x) / log(2.0);
+}
+#endif
+*/
+
+void printV(const int *a, int n, const char *comment);
+
+inline int ipow(int n, int e) {
+    int v = 1;
+    for (int i = 0; i < e; i++) {
+        v *= n;
+    }
+    return v;
+}
+
+int **new2(int n, int m);
+void delete2(int **v, int n);
 
 #endif
