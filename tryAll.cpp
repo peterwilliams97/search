@@ -5,14 +5,18 @@
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
+#include <vector>
 using namespace std;
 #define DEBUGLEVEL 1
 #include "util.h"
 
-void suffixArray(const int *s, int *SA, int n, int K);
-void suffixArrayLcp(const int *s, int *SA, int *lcp, int n, int K);
+void suffixArray(const int *s, int n, int K, int *SA);
+void suffixArrayLcp(const int *s, int n, int K, int *sa, int *lcp);
+void suffixArrayLcpLR(const int *s, int n, int K, int *sa, int *lcp, int *llcp, int *rlcp);
+vector<int> sa_search(const int *s, const int *sa, const int *lcp, const int *llcp, const int *rlcp,
+              int n,
+              const int *pattern, int p);
 bool test_rmq();
-
 
 
 bool isPermutation(const int *SA, int n) {
@@ -37,7 +41,7 @@ bool sleq(const int *s1, const int *s2) {
 }
 
 // is SA a sorted suffix array for s?
-bool 
+bool
 isSorted(const int *SA, const int *s, int n) {
     for (int i = 0; i < n - 1; i++) {
         if (!sleq(s + SA[i], s + SA[i + 1])) {
@@ -47,15 +51,32 @@ isSorted(const int *SA, const int *s, int n) {
     return true;
 }
 
-double 
-test_one(const int *s, int *SA, int *lcp, int n, int b, bool do_check=false) {
+static double
+test_one(const int *s, int n, int b, bool do_check, int *SA, int *lcp, int *llcp, int *rlcp) {
 
     cout << "-------------------\n";
     Debug1(printV(s, n, "s"));
 
     clock_t start = clock();
-    suffixArrayLcp(s, SA, lcp, n, b);
+    suffixArrayLcpLR(s, n, b, SA, lcp, llcp, rlcp);
     double duration = (double)(clock() - start) / CLOCKS_PER_SEC;
+
+    int p = n / 2;
+    int actual_offset = p / 2;
+    int *pattern = new int[p];
+    for (int i = 0; i < p; i++) {
+        pattern[i] = s[actual_offset + i];
+    }
+    Debug1(printV(pattern, p, "p"));
+
+    vector<int> offsets = sa_search(s, SA, lcp, llcp, rlcp, n, pattern, p);
+    cout << "offset actual = " << actual_offset << ", detected = " << offsets.size() << ": " ;
+    for (int i = 0; i < Min(offsets.size(), 10); i++) {
+        cout << offsets[i] << ", ";
+    }
+    cout << endl;
+    Assert0(find(offsets.begin(), offsets.end(), actual_offset) != offsets.end());
+
 
     if (do_check) {
         Assert0(s[n] == 0);
@@ -71,31 +92,37 @@ test_one(const int *s, int *SA, int *lcp, int n, int b, bool do_check=false) {
     return duration;
 }
 
-double 
+
+double
 test_n_b(int n, int b) {
+
+    bool do_check = false;
 
     int *s = new int[n + 3];
     int *SA = new int[n + 3];
     int *lcp = new int[n + 3];
+    int *llcp = new int[n + 3];
+    int *rlcp = new int[n + 3];
     for (int i = 0; i < n; i++) {
-        lcp[i] = SA[i] = -1;
+        llcp[i] = rlcp[i] = lcp[i] = SA[i] = -1;
     }
     for (int i = 0; i < n; i++) {
         s[i] = i % b;
     }
     s[n] = s[n + 1] = s[n + 2] = SA[n] = SA[n + 1] = SA[n + 2] = 0;
-
-
-    double duration =  test_one(s, SA, lcp, n, b);
+    
+    double duration = test_one(s, n, b, false, SA, lcp, llcp, rlcp);
 
     delete[] s;
     delete[] SA;
     delete[] lcp;
+    delete[] llcp;
+    delete[] rlcp;
 
     return duration;
 }
 
-void 
+void
 test_sa(const char *text) {
     int n = (int)strlen(text);
     int k = 0;
@@ -119,6 +146,8 @@ test_sa(const char *text) {
     int *s = new int[n + 3];
     int *sa = new int[n + 3];
     int *lcp = new int[n + 3];
+    int *llcp = new int[n + 3];
+    int *rlcp = new int[n + 3];
 
     for (int i = 0; i < n + 3; i++) {
         s[i] = sa[i] = lcp[i] = 0;
@@ -128,31 +157,33 @@ test_sa(const char *text) {
         s[i] = char_int[text[i]];
     }
 
-    test_one(s, sa, lcp, n, k, true);
+    test_one(s, n, k, true, sa, lcp, llcp, rlcp);
     cout << "Done: " << text << endl;
 }
 
-void 
+void
 banana() {
     test_sa("banana");
 }
 
-void 
+void
 test_n_all_b(int n, int b) {
 
     int N = int(pow(double(b), n) + 0.5);
     int *s = new int[n + 3];
     int *SA = new int[n + 3];
     int *lcp = new int[n + 3];
+    int *llcp = new int[n + 3];
+    int *rlcp = new int[n + 3];
     for (int i = 0; i < n; i++) {
-        lcp[i] = s[i] = SA[i] = -1;
+        llcp[i] = rlcp[i] = lcp[i] = SA[i] = -1;
     }
     for (int i = n; i < n + 3 ; i++) {
         lcp[i] = s[i] = SA[i] = 0;
     }
 
     for (int j = 0; j < N; j++) {
-        test_one(s, SA, lcp, n, b);
+        test_one(s, n, b, false, SA, lcp, llcp, rlcp);
 
         // generate next s
         int i;
@@ -164,6 +195,8 @@ test_n_all_b(int n, int b) {
     delete[] s;
     delete[] SA;
     delete[] lcp;
+    delete[] llcp;
+    delete[] rlcp;
 }
 
 // try all inputs from {1,..,b}^n for 1 <= n <= nmax
@@ -176,16 +209,18 @@ int main(int argc, char **argv) {
     //int s1[] = {2,1,3,1,3,1,0,0,0}; // banana
     //int s2[] = {0,0,0,0,0,0,0,0,0};
 
-    test_rmq();
-
 #if 0
+    test_rmq();
+#endif
+
+#if 1
     banana();
 
     int n, b;
     b = 256;
-    n = 1000; 
+    n = 1000;
 
-    for (n = 16 * 1024; n <= 1024 * 1024 * 1024; n *= 2) {
+    for (n = 4; n <= 1024 * 1024 * 1024; n *= 2) {
         cout << "=====================" << endl;
         cout << "n=" << n << ",b=" << b << endl;
         for (int i = 0; i < 1; i++) {

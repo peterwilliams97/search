@@ -22,5 +22,4 @@ Importing a Subversion Repo?
   Click here
 
 When you're done:
-  Continsue
-
+  Continue

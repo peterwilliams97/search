@@ -11,8 +11,8 @@ using namespace std;
  * Build naive RMQ look-up-table rmq_lut for sequence s
  * s[n]
  * rmq_lut[n][n]  rmq_lut[i][j] = rmq_lut(i, j)
- * 
- * O(n^2) time and space construction 
+ *
+ * O(n^2) time and space construction
  * O(1) operation
  */
 void preprocess_rmq_1(const int *s, int n, int **rmq_lut) {
@@ -31,7 +31,7 @@ void preprocess_rmq_1(const int *s, int n, int **rmq_lut) {
 /*
  * Build RMQ look-up-table rmq_lut for sequence s
  * s[n]
- * rmq_lut[sqrt(n)] 
+ * rmq_lut[sqrt(n)]
  *
  * O(n) time, O(sqrt(n)) space construction
  * O(sqrt(n)) operation
@@ -64,7 +64,7 @@ int get_rmq_2(const int *s, int n, const int *rmq_lut, int i, int j) {
     int k;
     int v;
 
-    //int ti = (i + r - 1) / r; // 1 offset 
+    //int ti = (i + r - 1) / r; // 1 offset
     int ti = (i + r) / r - 1; // 0 offset
     if (ti * r != i) {
         for (k = i; k < ti * r; k++) {
@@ -107,8 +107,9 @@ void preprocess_rmq_3(const int *s, int n, int **rmq_lut) {
     for (i = 0; i < n; i++) {
         rmq_lut[i][0] = i;
     }
-    //compute values from smaller to bigger intervals
+    // compute values from smaller to bigger intervals
     for (j = 1; 1 << j <= n; j++) {
+        //cout << j << endl; // !@#$
         for (i = 0; i + (1 << j) - 1 < n; i++) {
             int rmq1 = rmq_lut[i][j - 1];
             int rmq2 = rmq_lut[i + (1 << (j - 1))][j - 1];
@@ -135,7 +136,7 @@ void preprocess_rmq_3(const int *s, int n, int **rmq_lut) {
         //compute the values in the left and right subtrees
         initialize(2 * node, b, (b + e) / 2, M, A, N);
         initialize(2 * node + 1, (b + e) / 2 + 1, e, M, A, N);
-        //search for the minimum value in the first and 
+        //search for the minimum value in the first and
         //second half of the interval
         if (A[M[2 * node]] <= A[M[2 * node + 1]])
             M[node] = M[2 * node];
@@ -151,7 +152,6 @@ void preprocess_rmq_3(const int *s, int n, int **rmq_lut) {
 * s[n]
 * tree[n]
 *
-
 */
 void compute_tree(const int *s, int n, int *tree) {
     int *st = new int[n];
@@ -160,7 +160,7 @@ void compute_tree(const int *s, int n, int *tree) {
     //we start with an empty stack
     //at step i we insert A[i] in the stack
     for (i = 0; i < n; i++)  {
-        //compute the position of the first element that is 
+        //compute the position of the first element that is
         //equal or smaller than s[i]
         k = top;
         while (k >= 0 && s[st[k]] > s[i]) {
@@ -175,19 +175,19 @@ void compute_tree(const int *s, int n, int *tree) {
             tree[st[k + 1]] = i;
             cout << "   tree[" << st[k + 1] << "]=" << i << ",v=" << s[i] << endl;;
         }
-        //we insert A[i] in the stack and remove 
+        //we insert A[i] in the stack and remove
         //any bigger elements
         st[++k] = i;
         cout << "i=" << i << ", ";
         printV(st, k, "stack");
         top = k;
-        
+
     }
-    //the first element in the stack is the root of 
+    //the first element in the stack is the root of
     //the tree, so it has no father
     tree[st[0]] = -1;
     cout << "   tree[" << st[0] << "]=" << -1 << ",v=*" << endl;;
-    
+
 
     delete[] st;
 }
@@ -195,8 +195,9 @@ void compute_tree(const int *s, int n, int *tree) {
 int
 test_rmq_3(const int *s, int n, int i, int j, int rmq_ij) {
     int lg_n = int(ceil(log2(n)));
-    int **rmq_lut = new2(n, lg_n);
-    
+    //cout << "test_rmq_3: n = " << n << ", lg_n = " << lg_n << endl;
+    int **rmq_lut = new2(n, lg_n + 1);
+
     int rmq_k = -1;
     preprocess_rmq_3(s, n, rmq_lut);
 #if 1
@@ -211,14 +212,14 @@ test_compute_tree(const int *s, int n) {
     int *tree = new int[n];
 
     compute_tree(s, n, tree);
-    
+
     printV(tree, n, "tree");
 
     delete [] tree;
 }
 
 bool test_rmq() {
-#if 0
+#if 1
     for (int k = 1; k < 1000; k++) {
         int **rmq_lut = new2(k, 10);
         delete2(rmq_lut, k);
@@ -226,7 +227,7 @@ bool test_rmq() {
 #endif
 
     bool ok = false;
-    int n = 4;
+    int n = 4000;
 #if 1
     int *s = new int[n];
     for (int k = 0; k < n; k++) {
@@ -237,7 +238,7 @@ bool test_rmq() {
     int s[] = { 2, 4, 3, 1, 6, 7, 8, 9, 1, 7 };
 #endif
     printV(s, n, "s");
-    test_compute_tree(s, n);
+    //test_compute_tree(s, n);
 
     for (int i = 0; i <= 3 * n / 2; i++) {
         for (int j = i; j < n; j++) {
