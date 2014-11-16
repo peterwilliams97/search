@@ -143,7 +143,7 @@ void calc_lcp(const int *s, const int *sa, int n, int *lcp) {
 /*
  * http://webglimpse.net/pubs/suffix.pdf
 
-  height(i) = lcp(A[Pos[i-1]], A[Pos[i])], 
+  height(i) = lcp(A[Pos[i-1]], A[Pos[i])],
                1 <= i <= N-1,
                A is input string
                Pos[i] = position of ith lexicallu sorted suffix in A
@@ -156,7 +156,7 @@ void calc_lcp(const int *s, const int *sa, int n, int *lcp) {
 
  */
 
-static int 
+static int
 calclcp_recurse(const int *hgt, int l, int r, int *llcp, int *rlcp) {
     if (r - l > 1) {
         int m = (r + l) / 2;
@@ -203,6 +203,7 @@ comp(const int *s, const int *sa, int n, const int *pattern, int p, int i) {
  * Find offset of string `pattern` of length `p` in string `s` of length n
  *  using suffix array sa
  */
+#if 1
 vector<int>
 sa_search(const int *s, const int *sa, const int *lcp, const int *llcp, const int *rlcp,
              int n,
@@ -218,7 +219,7 @@ sa_search(const int *s, const int *sa, const int *lcp, const int *llcp, const in
     if (comp(s, sa, n, pattern, p, n - 1) > 0) {
         return matches;
     }
-    
+
     while (l < r) {
         m = (l + r) / 2;
         int d = comp(s, sa, n, pattern, p, m);
@@ -243,3 +244,44 @@ sa_search(const int *s, const int *sa, const int *lcp, const int *llcp, const in
 
     return matches;
 }
+#endif
+
+/*
+    http://webglimpse.net/pubs/suffix.pdf Figure 3: An O(P + log N) search for L W.
+
+    Search for string W in suffix array of string A
+    Pos[i] = position of ith lexographically sorted suffix in A
+
+    Binary search suffix array using L, M, R
+    LW is position of W in suffix array
+    P = lenghth of W
+    l, m, r are lcp(L, W), lcp(M, W), lcp(R, W)
+
+    l <- lcp(A[Pos[0]] , W)
+    r <- lcp(A[Pos[N - 1]], W)
+    if l = P or W[l] <= A[Pos[0] + l] then
+        LW = 0
+    else if r < P or W[r] <= A[Pos[N - 1] + r] then
+        LW  = N
+    else {
+        (L, R) <- (0, N - 1)
+        while R - L > 1 do {
+            M <- (L + R)/2
+            if l >= r then
+                if Lcp[M] >= l then
+                    m <- l + lcp(A[Pos[M] + l], W[l])
+                else
+                    m <- Lcp[M]
+            else
+                if Rcp[M] >= r then
+                    m <- r + lcp(A[Pos[M] + r], W[r])
+                else
+                    m <- Rcp[M]
+            if m = P or w <= m a Pos[M] + m then
+                (R, r) <- (M, m)
+            else
+                (L, l) <- (M, m)
+        }
+        LW <- R
+    }
+ */

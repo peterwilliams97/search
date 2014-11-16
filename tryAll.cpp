@@ -61,8 +61,9 @@ test_one(const int *s, int n, int b, bool do_check, int *SA, int *lcp, int *llcp
     suffixArrayLcpLR(s, n, b, SA, lcp, llcp, rlcp);
     double duration = (double)(clock() - start) / CLOCKS_PER_SEC;
 
-    int p = n / 2;
-    int actual_offset = p / 2;
+    int p = n / 3;
+    int actual_offset = p / 2  +1;
+    p = Min(p, 20);
     int *pattern = new int[p];
     for (int i = 0; i < p; i++) {
         pattern[i] = s[actual_offset + i];
@@ -110,7 +111,7 @@ test_n_b(int n, int b) {
         s[i] = i % b;
     }
     s[n] = s[n + 1] = s[n + 2] = SA[n] = SA[n + 1] = SA[n + 2] = 0;
-    
+
     double duration = test_one(s, n, b, false, SA, lcp, llcp, rlcp);
 
     delete[] s;
