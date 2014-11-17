@@ -13,7 +13,7 @@ using namespace std;
 void suffixArray(const int *s, int n, int K, int *SA);
 void suffixArrayLcp(const int *s, int n, int K, int *sa, int *lcp);
 void suffixArrayLcpLR(const int *s, int n, int K, int *sa, int *lcp, int *llcp, int *rlcp);
-vector<int> sa_search(const int *s, const int *sa, const int *lcp, const int *llcp, const int *rlcp,
+vector<int> sa_search(const int *s, const int *sa, const int *llcp, const int *rlcp,
               int n,
               const int *pattern, int p);
 bool test_rmq();
@@ -70,7 +70,7 @@ test_one(const int *s, int n, int b, bool do_check, int *SA, int *lcp, int *llcp
     }
     Debug1(printV(pattern, p, "p"));
 
-    vector<int> offsets = sa_search(s, SA, lcp, llcp, rlcp, n, pattern, p);
+    vector<int> offsets = sa_search(s, SA, llcp, rlcp, n, pattern, p);
     cout << "offset actual = " << actual_offset << ", detected = " << offsets.size() << ": " ;
     for (int i = 0; i < Min(offsets.size(), 10); i++) {
         cout << offsets[i] << ", ";

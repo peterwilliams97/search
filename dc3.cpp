@@ -156,21 +156,38 @@ void calc_lcp(const int *s, const int *sa, int n, int *lcp) {
 
  */
 
+// left, right are for debugging
 static int
-calclcp_recurse(const int *hgt, int l, int r, int *llcp, int *rlcp) {
+calclcp_recurse(const int *hgt, int l, int r, int *llcp, int *rlcp, 
+                int *left, int *right) {
     if (r - l > 1) {
         int m = (r + l) / 2;
-        llcp[m] = calclcp_recurse(hgt, l, m, llcp, rlcp);
-        rlcp[m] = calclcp_recurse(hgt, m, r, llcp, rlcp);
+        llcp[m] = calclcp_recurse(hgt, l, m, llcp, rlcp, left, right);
+        rlcp[m] = calclcp_recurse(hgt, m, r, llcp, rlcp, left, right);
+        left[m] = l;
+        right[m] = r;
+        printf("%3d: [%3d %3d]\n", m, l, r);
         return Min(llcp[m], rlcp[m]);
-    }
-    else {
+    } else {
         return hgt[r];
     }
 }
 
 void calc_lcp_lr(const int *lcp, int n, int *llcp, int *rlcp) {
-    calclcp_recurse(lcp, 0, n - 1, llcp, rlcp);
+
+    int *left = new int[n];
+    int *right = new int[n];
+    for (int i = 0; i < n; i++) {
+        left[i] = right[i] = llcp[i] = rlcp[i] = -1;
+    }
+    printf("Recursing %d - %d\n", 0, n - 1);
+    calclcp_recurse(lcp, 0, n - 1, llcp, rlcp, left, right);
+    for (int i = 0; i < n; i++) {
+        printf("%3d: [%3d %3d] [%3d %3d]\n",
+               i, left[i], right[i], llcp[i], rlcp[i]);
+    }
+    delete[] left;
+    delete[] right;
 }
 
 void suffixArrayLcp(const int *s, int n, int K, int *sa, int *lcp) {
@@ -203,7 +220,7 @@ comp(const int *s, const int *sa, int n, const int *pattern, int p, int i) {
  * Find offset of string `pattern` of length `p` in string `s` of length n
  *  using suffix array sa
  */
-#if 1
+#if 0
 vector<int>
 sa_search(const int *s, const int *sa, const int *lcp, const int *llcp, const int *rlcp,
              int n,
@@ -250,38 +267,190 @@ sa_search(const int *s, const int *sa, const int *lcp, const int *llcp, const in
     http://webglimpse.net/pubs/suffix.pdf Figure 3: An O(P + log N) search for L W.
 
     Search for string W in suffix array of string A
+    A[i] = t
     Pos[i] = position of ith lexographically sorted suffix in A
 
     Binary search suffix array using L, M, R
-    LW is position of W in suffix array
-    P = lenghth of W
-    l, m, r are lcp(L, W), lcp(M, W), lcp(R, W)
+    b, m, r are lcp(L, W), lcp(M, W), lcp(R, W)  ;l 1 too hard to distinguish
+    P = length of W
+    [LW, RW] are positions of W in suffix array
+        LW = min(k : W <=P A[Pos[k]:] or k = N)
+        RW = max(k : A[Pos[k]] <=P W or k = -1)
+        ie 
+            LW = min(k : W[:P] <= A[Pos[k]:P] or k = N)
+            RW = max(k : A[Pos[k]:P] <= W[:P] or k = -1)
 
-    l <- lcp(A[Pos[0]] , W)
-    r <- lcp(A[Pos[N - 1]], W)
-    if l = P or W[l] <= A[Pos[0] + l] then
+    b = lcp(A[Pos[0]:] , W)
+    r = lcp(A[Pos[N - 1]:], W)
+    if b == P or W[b] <= A[Pos[0] + b]:
         LW = 0
-    else if r < P or W[r] <= A[Pos[N - 1] + r] then
+    elif r == P and W[r] > A[Pos[N - 1] + r]:
         LW  = N
-    else {
-        (L, R) <- (0, N - 1)
-        while R - L > 1 do {
-            M <- (L + R)/2
-            if l >= r then
-                if Lcp[M] >= l then
-                    m <- l + lcp(A[Pos[M] + l], W[l])
-                else
-                    m <- Lcp[M]
-            else
-                if Rcp[M] >= r then
-                    m <- r + lcp(A[Pos[M] + r], W[r])
-                else
-                    m <- Rcp[M]
-            if m = P or w <= m a Pos[M] + m then
-                (R, r) <- (M, m)
-            else
-                (L, l) <- (M, m)
-        }
-        LW <- R
-    }
+    else:
+        (L, R) = (0, N - 1)
+        while R - L > 1:
+            M = (L + R) / 2
+            if b >= r:
+                if Lcp[M] >= b:
+                    m = b + lcp(A[Pos[M] + b], W[b])
+                else:
+                    m = Lcp[M]
+            else:
+                if Rcp[M] >= r:
+                    m = r + lcp(A[Pos[M] + r], W[r])
+                else:
+                    m = Rcp[M]
+            if m == P or W[m:] <= A[Pos[M] + m:]:
+                (R, r) = (M, m)
+            else:
+                (L, b) = (M, m)
+        LW = R
+
  */
+#if 1
+
+// lcp(A[a], W[b])
+static inline int
+get_lcp(const int *A, int N, const int *W, int P, 
+        int a, int b) {
+    int lcp = 0;
+    int d = Min(N - a, P - b);
+    for (lcp = 0; lcp < d; lcp++) {
+        if (A[a + lcp] != W[b + lcp]) {
+            break;
+        }
+    }
+    return lcp;
+}
+
+// W[i] <= A[Pos[j] + k]
+// comp2 = W[a] - A[Pos[b] + c]
+static inline int
+comp2(const int *A, const int *Pos, int N, const int *W, int P, 
+      int a, int b, int c) {
+    int pos = Pos[b];
+    int m = Min(N - pos, P);
+    for (int k = 0; k < m; k++) {
+        int d = W[k] - A[pos + k];
+        if (d != 0) return d;
+    }
+    return 0;
+}
+
+int
+sa_search_lw(const int *A, const int *Pos, const int *Lcp, const int *Rcp,
+int N,
+const int *W, int P) {
+    int L, M, R;
+    int b, m, r;
+    int LW;
+
+    // b = lcp(A[Pos[0]:], W)
+    // r = lcp(A[Pos[N - 1]:], W)
+    b = get_lcp(A, N, W, P, Pos[0], 0);
+    r = get_lcp(A, N, W, P, Pos[N - 1], 0);
+
+    // if b == P or W[b] <= A[Pos[0] + b]:
+    if (b == P || comp2(A, Pos, N, W, P, b, 0, b) <= 0) {
+        LW = 0;
+        // elif r == P and W[r] > A[Pos[N - 1] + r]:
+    } else if (r == P && comp2(A, Pos, N, W, P, r, N - 1, r) > 0) {
+        LW = N;
+    } else {
+        L = 0;
+        R = N - 1;
+        while (R - L > 1) {
+            M = (L + R) / 2;
+            Assert(Lcp[M] >= 0);
+            Assert(Rcp[M] >= 0);
+            if (b >= r) {
+                if (Lcp[M] >= b) {
+                    m = b + get_lcp(A, N, W, P, Pos[M] + b, b);
+                } else {
+                    m = Lcp[M];
+                }
+            } else {
+                if (Rcp[M] >= r) {
+                    m = r + get_lcp(A, N, W, P, Pos[M] + r, r);
+                } else {
+                    m = Rcp[M];
+                }
+                // if m == P or W[m:] <= A[Pos[M] + m:] :
+                if (m == P || comp2(A, Pos, N, W, P, m, M, m) <= 0) {
+                    R = M;
+                    r = m;
+                } else {
+                    L = M;
+                    b = m;
+                }
+            }
+        }
+        LW = R;
+    }
+    return LW;
+}
+
+int
+sa_search_rw(const int *A, const int *Pos, const int *Lcp, const int *Rcp,
+             int N,
+             const int *W, int P) {
+    int L, M, R;
+    int b, m, r;
+    int RW;
+
+    b = get_lcp(A, N, W, P, Pos[0], 0);
+    r = get_lcp(A, N, W, P, Pos[N - 1], 0);
+
+    if (b == P && comp2(A, Pos, N, W, P, b, 0, b) < 0) {
+        RW = -1;
+    } else if (r == P && comp2(A, Pos, N, W, P, r, N - 1, r) >= 0) {
+        RW = N - 1;
+    } else {
+        L = 0;
+        R = N - 1;
+        while (R - L > 1) {
+            M = (L + R) / 2;
+            Assert(Lcp[M] >= 0);
+            Assert(Rcp[M] >= 0);
+            if (b > r) {
+                if (Lcp[M] >= b) {
+                    m = b + get_lcp(A, N, W, P, Pos[M] + b, b);
+                } else {
+                    m = Lcp[M];
+                }
+            } else {
+                if (Rcp[M] >= r) {
+                    m = r + get_lcp(A, N, W, P, Pos[M] + r, r);
+                } else {
+                    m = Rcp[M];
+                }
+                if (m == P || comp2(A, Pos, N, W, P, m, M, m) <= 0) {
+                    R = M;
+                    r = m;
+                } else {
+                    L = M;
+                    b = m;
+                }
+            }
+        }
+        RW = R;
+    }
+    return RW;
+}
+
+vector<int>
+sa_search(const int *A, const int *Pos, const int *Lcp, const int *Rcp,
+          int N,
+          const int *W, int P) {
+    int RW = sa_search_rw(A, Pos, Lcp, Rcp, N, W, P);
+    int LW = sa_search_lw(A, Pos, Lcp, Rcp, N, W, P);
+    
+    vector<int> matches;
+    for (int k = LW; k <= RW; k++) {
+        matches.push_back(Pos[k]);
+    }
+    sort(matches.begin(), matches.end());
+    return matches;
+}
+
+#endif
