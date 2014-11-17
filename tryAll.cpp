@@ -221,6 +221,17 @@ int main(int argc, char **argv) {
     b = 256;
     n = 1000;
 
+    for (n = 2; n <= 256; n *= 2) {
+        cout << "=====================" << endl;
+        cout << "n=" << n << ",b=" << b << endl;
+        for (int i = 0; i < 1; i++) {
+            double duration = test_n_b(n, 2);
+            int rate = (int)((double)n / duration);
+            cout << "Time  = " << duration << endl;
+            cout << "n/sec = " << rate << endl;
+        }
+    }
+
     for (n = 4; n <= 1024 * 1024 * 1024; n *= 2) {
         cout << "=====================" << endl;
         cout << "n=" << n << ",b=" << b << endl;
