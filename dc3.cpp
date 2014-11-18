@@ -184,10 +184,12 @@ calclcp_recurse(const int *hgt, int l, int r, int *llcp, int *rlcp,
         int m = (r + l) / 2;
         llcp[m] = calclcp_recurse(hgt, l, m, llcp, rlcp, left, right);
         rlcp[m] = calclcp_recurse(hgt, m, r, llcp, rlcp, left, right);
+#if 0
         left[m] = l;
         right[m] = r;
         printf("- %3d: [%3d %3d] [%3d %3d]\n",
                m, left[m], right[m], llcp[m], rlcp[m]);
+#endif
         return Min(llcp[m], rlcp[m]);
     } else {
         return hgt[r - 1];
@@ -196,17 +198,21 @@ calclcp_recurse(const int *hgt, int l, int r, int *llcp, int *rlcp,
 
 void calc_lcp_lr(const int *lcp, int n, int *llcp, int *rlcp) {
 
-    int *left = new int[n];
-    int *right = new int[n];
+    int *left = new int[n];   // !@#$ delete
+    int *right = new int[n]; // !@#$ delete
+#if 0
     for (int i = 0; i < n; i++) {
         left[i] = right[i] = llcp[i] = rlcp[i] = -1;
     }
-    printf("Recursing %d - %d\n", 0, n - 1);
+#endif
+    //printf("Recursing %d - %d\n", 0, n - 1);
     calclcp_recurse(lcp, 0, n - 1, llcp, rlcp, left, right);
+#if 0
     for (int i = 0; i < n; i++) {
         printf("$ %3d: [%3d %3d] [%3d %3d]\n",
                i, left[i], right[i], llcp[i], rlcp[i]);
     }
+#endif
     delete[] left;
     delete[] right;
 }
@@ -218,6 +224,7 @@ void suffixArrayLcp(const int *s, int n, int K, int *sa, int *lcp) {
 
 void suffixArrayLcpLR(const int *s, int n, int K, int *sa, int *lcp, int *llcp, int *rlcp) {
     suffixArray(s, n, K, sa);
+#if 0
     for (int i = 0; i < n; i++) {
         int pos = sa[i];
         char comment[10];
@@ -225,6 +232,7 @@ void suffixArrayLcpLR(const int *s, int n, int K, int *sa, int *lcp, int *llcp, 
         printV(s + pos, n - pos, comment);
     }
     printV(sa, n, "sa");
+#endif
     calc_lcp(s, sa, n, lcp);
     calc_lcp_lr(lcp, n, llcp, rlcp);
 }
@@ -389,11 +397,11 @@ sa_search_lw(const int *A, const int *Pos, const int *Lcp, const int *Rcp,
         R = N - 1;
         while (R - L > 1) {
             M = (L + R) / 2;
-            printf("LW: %3d: [%3d %3d] [%3d %3d] %d %d\n", 
-                   M, L, R, Lcp[M], Rcp[M], b, r);
+            //printf("LW: %3d: [%3d %3d] [%3d %3d] %d %d\n", 
+            //       M, L, R, Lcp[M], Rcp[M], b, r);
             Assert(Lcp[M] >= 0);
             Assert(Rcp[M] >= 0);
-            
+
             if (b >= r) {
                 if (Lcp[M] >= b) {
                     m = b + get_lcp(A, N, W, P, Pos[M] + b, b);
@@ -441,8 +449,8 @@ sa_search_rw(const int *A, const int *Pos, const int *Lcp, const int *Rcp,
         R = N - 1;
         while (R - L > 1) {
             M = (L + R) / 2;
-            printf("RW: %3d: [%3d %3d] [%3d %3d] %d %d\n",
-                M, L, R, Lcp[M], Rcp[M], b, r);
+            //printf("RW: %3d: [%3d %3d] [%3d %3d] %d %d\n",
+            //        M, L, R, Lcp[M], Rcp[M], b, r);
             Assert(Lcp[M] >= 0);
             Assert(Rcp[M] >= 0);
 
@@ -460,12 +468,12 @@ sa_search_rw(const int *A, const int *Pos, const int *Lcp, const int *Rcp,
                 }
             }
             // if m == P or W[m:] <= A[Pos[M] + m:] :
-            if (m == P || comp2(A, Pos, N, W, P, m, M, m) < 0) {
-                R = M;
-                r = m;
-            } else {
+            if (m == P || comp2(A, Pos, N, W, P, m, M, m) >= 0) {
                 L = M;
                 b = m;
+            } else {
+                R = M;
+                r = m;
             }
         }
         RW = L;
