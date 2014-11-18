@@ -78,7 +78,6 @@ test_one(const int *s, int n, int b, bool do_check, int *SA, int *lcp, int *llcp
     cout << endl;
     Assert0(find(offsets.begin(), offsets.end(), actual_offset) != offsets.end());
 
-
     if (do_check) {
         Assert0(s[n] == 0);
         Assert0(s[n + 1] == 0);
@@ -215,23 +214,23 @@ int main(int argc, char **argv) {
 #endif
 
 #if 1
-    banana();
+    // banana();
 
     int n, b;
-    b = 256;
-    n = 1000;
 
-    for (n = 2; n <= 256; n *= 2) {
+    b = 2;
+    for (n = 4; n <= 256; n *= 2) {
         cout << "=====================" << endl;
         cout << "n=" << n << ",b=" << b << endl;
         for (int i = 0; i < 1; i++) {
-            double duration = test_n_b(n, 2);
+            double duration = test_n_b(n, b);
             int rate = (int)((double)n / duration);
             cout << "Time  = " << duration << endl;
             cout << "n/sec = " << rate << endl;
         }
     }
 
+    b = 256;
     for (n = 4; n <= 1024 * 1024 * 1024; n *= 2) {
         cout << "=====================" << endl;
         cout << "n=" << n << ",b=" << b << endl;
