@@ -17,6 +17,7 @@ vector<int> sa_search(const int *s, const int *sa, const int *llcp, const int *r
               int n,
               const int *pattern, int p);
 bool test_rmq();
+void test_compute_tree(const int *s, int n);
 
 
 bool isPermutation(const int *SA, int n) {
@@ -63,7 +64,7 @@ test_one(const int *s, int n, int b, bool do_check, int *SA, int *lcp, int *llcp
 
     int p = n / 3;
     int actual_offset = p / 2  +1;
-    p = Min(p, 20);
+    p = Min(p, Max(20, n / 10));
     int *pattern = new int[p];
     for (int i = 0; i < p; i++) {
         pattern[i] = s[actual_offset + i];
@@ -211,6 +212,12 @@ int main(int argc, char **argv) {
 
 #if 0
     test_rmq();
+#endif
+
+#if 1
+    int s[10] = { 2, 4, 3, 1, 6, 7, 8, 9, 1, 7 };
+    printV(s, 10, "s");
+    test_compute_tree(s, 10);
 #endif
 
 #if 1

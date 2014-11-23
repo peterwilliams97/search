@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include "util.h"
+#include "node.h"
 using namespace std;
 
 /*
@@ -187,10 +188,62 @@ void compute_tree(const int *s, int n, int *tree) {
     //the tree, so it has no father
     tree[st[0]] = -1;
     cout << "   tree[" << st[0] << "]=" << -1 << ",v=*" << endl;;
-
-
+    
     delete[] st;
 }
+
+
+// http://wcipeg.com/wiki/Cartesian_tree
+// http://www3.cs.stonybrook.edu/~bender/newpub/BenderFa00-lca.pdf
+// http://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-851-advanced-data-structures-spring-2012/calendar-and-notes/MIT6_851S12_L15.pdf 2.1.1
+Node *compute_tree2(const int *s, int n) {
+    int i;
+
+    Node *tree = new Node[n];
+    for (i = 0; i < n; i++) {
+        tree[i]._val = s[i];
+    }
+
+    int root = 0;
+
+    for (i = 1; i < n; i++) {
+        int last = i - 1;
+
+        // Walk up right spine of tree
+        while (last != root && s[i] < tree[last]._val) {
+            last = tree[last]._parent;
+            Assert(0 <= last && last < n);
+            cout << last << ", ";
+        }
+
+        if (s[i] < tree[last]._val) {       // s[i] is the smallest element yet; make it new root
+            tree[root]._parent = i;
+            tree[i]._left = root;
+            root = i;
+            cout << "A ";
+        } else if (tree[last]._right == -1) { // Last = Bottom of right spine -> Make i bottom of right spine
+           tree[last]._right = i;
+           tree[i]._parent = last;
+           cout << "B ";
+        } else {                            // Make last i's left child and i last's parent's right child
+            tree[tree[last]._parent]._right = i;
+            tree[i]._parent  = tree[last]._parent;
+            tree[i]._left = last;
+            tree[last]._parent = i;
+            cout << "C ";
+        }
+        
+        print_node(i, tree[i]);
+        print_node(last, tree[last]);
+        print_node(root, tree[root]);
+        cout << endl;
+
+        Assert(tree[root]._parent == -1);
+    }
+    return tree;
+}
+
+
 
 int
 test_rmq_3(const int *s, int n, int i, int j, int rmq_ij) {
@@ -209,6 +262,7 @@ test_rmq_3(const int *s, int n, int i, int j, int rmq_ij) {
 
 void
 test_compute_tree(const int *s, int n) {
+#if 0
     int *tree = new int[n];
 
     compute_tree(s, n, tree);
@@ -216,6 +270,11 @@ test_compute_tree(const int *s, int n) {
     printV(tree, n, "tree");
 
     delete [] tree;
+#else
+    Node *tree = compute_tree2(s, n);
+    print_tree(tree, n, "tree");
+    delete[] tree;
+#endif
 }
 
 bool test_rmq() {
