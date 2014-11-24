@@ -207,6 +207,7 @@ Node *compute_tree2(const int *s, int n) {
     int root = 0;
 
     for (i = 1; i < n; i++) {
+        //print_tree(tree, n, "tree");
         int last = i - 1;
 
         // Walk up right spine of tree
@@ -225,18 +226,19 @@ Node *compute_tree2(const int *s, int n) {
            tree[last]._right = i;
            tree[i]._parent = last;
            cout << "B ";
-        } else {                            // Make i last's right child
-            tree[i]._parent = last;
-            tree[i]._right = tree[last]._right;
+        } else {                            // Make i last's right child and last's right child i's left child 
             tree[tree[last]._right]._parent = i;
+            tree[i]._left = tree[last]._right;
+            tree[i]._parent = last;
+            tree[last]._right = i;
             cout << "C ";
         }
-        
+
         print_node(i, tree[i]);
         print_node(last, tree[last]);
         print_node(root, tree[root]);
         cout << endl;
-
+        
         Assert(tree[i]._parent == -1 || tree[i]._parent != tree[i]._left);
         Assert(tree[i]._parent == -1 || tree[i]._parent != tree[i]._right);
         Assert(tree[i]._left == -1 || tree[i]._left != tree[i]._right);
