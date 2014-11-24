@@ -225,11 +225,10 @@ Node *compute_tree2(const int *s, int n) {
            tree[last]._right = i;
            tree[i]._parent = last;
            cout << "B ";
-        } else {                            // Make last i's left child and i last's parent's right child
-            tree[tree[last]._parent]._right = i;
-            tree[i]._parent  = tree[last]._parent;
-            tree[i]._left = last;
-            tree[last]._parent = i;
+        } else {                            // Make i last's right child
+            tree[i]._parent = last;
+            tree[i]._right = tree[last]._right;
+            tree[tree[last]._right]._parent = i;
             cout << "C ";
         }
         
@@ -238,6 +237,9 @@ Node *compute_tree2(const int *s, int n) {
         print_node(root, tree[root]);
         cout << endl;
 
+        Assert(tree[i]._parent == -1 || tree[i]._parent != tree[i]._left);
+        Assert(tree[i]._parent == -1 || tree[i]._parent != tree[i]._right);
+        Assert(tree[i]._left == -1 || tree[i]._left != tree[i]._right);
         Assert(tree[root]._parent == -1);
     }
     return tree;

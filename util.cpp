@@ -19,7 +19,7 @@ void print_node(int i, const Node& t) {
 }
 
 void print_tree(const Node *tree, int n, const char *comment) {
-    cout << comment << ": n= " << n << " : ";
+    cout << comment << ": n= " << n << " ======="  << endl;
     for (int i = 0; i < Min(n, 20); i++) {
         print_node(i, tree[i]);
         cout  << endl;

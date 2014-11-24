@@ -215,9 +215,10 @@ int main(int argc, char **argv) {
 #endif
 
 #if 1
-    int s[10] = { 2, 4, 3, 1, 6, 7, 8, 9, 1, 7 };
-    printV(s, 10, "s");
-    test_compute_tree(s, 10);
+    //int s[10] = { 2, 4, 3, 1, 6, 7, 8, 9, 1, 7 };
+    int s[8] = { 8, 7, 2, 8, 6, 9, 4, 5};
+    printV(s, 8, "s");
+    test_compute_tree(s, 8);
 #endif
 
 #if 1
