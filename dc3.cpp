@@ -5,18 +5,24 @@
 using namespace std;
 #include "util.h"
 
-// lexic. order for pairs
-inline bool leq(int a1, int a2, int b1, int b2) {
+// lexigrahic order for pairs
+inline
+bool
+leq(int a1, int a2, int b1, int b2) {
     return a1 < b1 || (a1 == b1 && a2 <= b2);
 }
 
 // and triples
-inline bool leq(int a1, int a2, int a3, int b1, int b2, int b3) {
+inline
+bool
+leq(int a1, int a2, int a3, int b1, int b2, int b3) {
     return a1 < b1 || (a1 == b1 && leq(a2, a3, b2, b3));
 }
 
 // stably sort a[0..n-1] to b[0..n-1] with keys in 0..K-1 in r[]
-static void radixPass(const int *a, int *b, const int *r, int n, int K) {
+static
+void
+radixPass(const int *a, int *b, const int *r, int n, int K) {
     // count occurrences
     int *c = new int[K + 1];                        // counter array
     for (int i = 0; i <= K; i++) c[i] = 0;          // reset counters
@@ -30,9 +36,19 @@ static void radixPass(const int *a, int *b, const int *r, int n, int K) {
     delete[] c;
 }
 
-// find the suffix array SA of s[0..n-1] in {1..K}^n
-// require s[n]=s[n+1]=s[n+2]=0, n>=2
-void suffixArray(const int *s, int n, int K, int *SA) {
+/*
+ * Compute the suffix array `SA` of `s[0..n-1]` in {1..K}^n
+ *
+ *  Params:
+ *      s: A string over the alphabet 1..K
+ *      n: Number of elements in s. (Actual size of s and SA must be rounded up to a multiple of 3
+ *      K: Alphabet size
+ *      SA: Suffix array returned here. Must have size n rounded up to a multiple of 3
+ *
+ * requires s[n] = s[n+1] = s[n+2]=0, n >= 2
+ */
+void
+suffixArray(const int *s, int n, int K, int *SA) {
 
     int n0 = (n + 2) / 3, n1 = (n + 1) / 3, n2 = n / 3, n02 = n0 + n2;
     int* s12 = new int[n02 + 3];  s12[n02] = s12[n02 + 1] = s12[n02 + 2] = 0;
@@ -40,7 +56,7 @@ void suffixArray(const int *s, int n, int K, int *SA) {
     int* s0 = new int[n0];
     int* SA0 = new int[n0];
 
-    // generate positions of mod 1 and mod  2 suffixes
+    // generate positions of mod 1 and mod 2 suffixes
     // the "+(n0-n1)" adds a dummy mod 1 suffix if n%3 == 1
     for (int i = 0, j = 0; i < n + (n0 - n1); i++) {
         if (i % 3 != 0)
@@ -120,11 +136,21 @@ void suffixArray(const int *s, int n, int K, int *SA) {
     delete[] s0;
 
     // To make shorter string earlier
-    //SA[n] = -1;  
+    //SA[n] = -1;
 }
 
-// https://sites.google.com/site/indy256/algo_cpp/suffix_array_lcp
-void calc_lcp(const int *s, const int *sa, int n, int *lcp) {
+/*
+ * Compute the longest common prefix array for string `s` given s's suffix array `sa`
+ *  Params:
+ *      s: A string encoded as an array of int
+ *      sa: s's suffix array
+ *      n: Number of elements in s.
+ *      lcp: LCP array returned here. Must have n - 1 elements?
+ *
+ * https://sites.google.com/site/indy256/algo_cpp/suffix_array_lcp
+ */
+void
+calc_lcp(const int *s, const int *sa, int n, int *lcp) {
     int *rank = new int[n];
 
     for (int i = 0; i < n; i++) {
@@ -135,8 +161,8 @@ void calc_lcp(const int *s, const int *sa, int n, int *lcp) {
     for (int i = 0, h = 0; i < n; i++) {
         //printV(lcp, n - 1, "LCP");
         if (rank[i] < n - 1) {
-            for (int j = sa[rank[i] + 1]; 
-                 i + h < n && j + h < n && s[i + h] == s[j + h]; // !@#$ Code more efficiently 
+            for (int j = sa[rank[i] + 1];
+                 i + h < n && j + h < n && s[i + h] == s[j + h]; // !@#$ Code more efficiently
                  h++) {
                 ;;
             }
@@ -145,9 +171,9 @@ void calc_lcp(const int *s, const int *sa, int n, int *lcp) {
                 --h;
             }
         }
-        
+
     }
-    
+
     printV(lcp, n -1 , "lcp");
     delete[] rank;
 #if 0
@@ -177,8 +203,9 @@ void calc_lcp(const int *s, const int *sa, int n, int *lcp) {
  */
 
 // left, right are for debugging
-static int
-calclcp_recurse(const int *hgt, int l, int r, int *llcp, int *rlcp, 
+static
+int
+calclcp_recurse(const int *hgt, int l, int r, int *llcp, int *rlcp,
                 int *left, int *right) {
     if (r - l > 1) {
         int m = (r + l) / 2;
@@ -196,7 +223,18 @@ calclcp_recurse(const int *hgt, int l, int r, int *llcp, int *rlcp,
     }
 }
 
-void calc_lcp_lr(const int *lcp, int n, int *llcp, int *rlcp) {
+/*
+ * Compute the longest common prefix array for string `s` given s's suffix array `sa`
+ *  Params:
+ *      s: A string encoded as an array of int
+ *      sa: s's suffix array
+ *      n: Number of elements in s.
+ *      lcp: LCP array returned here
+ *
+ * https://sites.google.com/site/indy256/algo_cpp/suffix_array_lcp
+ */
+void
+calc_lcp_lr(const int *lcp, int n, int *llcp, int *rlcp) {
 
     int *left = new int[n];   // !@#$ delete
     int *right = new int[n]; // !@#$ delete
@@ -217,12 +255,28 @@ void calc_lcp_lr(const int *lcp, int n, int *llcp, int *rlcp) {
     delete[] right;
 }
 
-void suffixArrayLcp(const int *s, int n, int K, int *sa, int *lcp) {
+void
+suffixArrayLcp(const int *s, int n, int K, int *sa, int *lcp) {
     suffixArray(s, n, K, sa);
     calc_lcp(s, sa, n, lcp);
 }
 
-void suffixArrayLcpLR(const int *s, int n, int K, int *sa, int *lcp, int *llcp, int *rlcp) {
+/*
+ * Compute suffix array, lcp and left and right lcp for string `s`
+ *
+ *  Params:
+ *      s: A string over the alphabet 1..K encoded as an array of int
+ *      n: Number of elements in s. (Actual size of s and SA must be rounded up to a multiple of 3
+ *      K: Alphabet size
+ *      sa: Suffix array returned here. Must have same size as s
+ *      lcp: Longest common prefix array return here. Must have same size as s
+ *      llcp: "Left" longest common prefix array return here. Must have same size as s
+ *      rlcp: "Right" longest common prefix array return here. Must have same size as s
+ *
+ * https://sites.google.com/site/indy256/algo_cpp/suffix_array_lcp
+ */
+void
+suffixArrayLcpLR(const int *s, int n, int K, int *sa, int *lcp, int *llcp, int *rlcp) {
     suffixArray(s, n, K, sa);
 #if 0
     for (int i = 0; i < n; i++) {
@@ -237,10 +291,11 @@ void suffixArrayLcpLR(const int *s, int n, int K, int *sa, int *lcp, int *llcp, 
     calc_lcp_lr(lcp, n, llcp, rlcp);
 }
 
-static inline int
+static inline
+int
 comp(const int *s, const int *sa, int n, const int *pattern, int p, int i) {
     int pos = sa[i];
-    //int m = Min(n - pos, p);
+
     for (int k = 0; k < p; k++) {
         if (pos + k >= n) {
             return +1;
@@ -312,7 +367,7 @@ sa_search(const int *s, const int *sa, const int *lcp, const int *llcp, const in
     [LW, RW] are positions of W in suffix array
         LW = min(k : W <=P A[Pos[k]:] or k = N)
         RW = max(k : A[Pos[k]] <=P W or k = -1)
-        ie 
+        ie
             LW = min(k : W[:P] <= A[Pos[k]:P] or k = N)
             RW = max(k : A[Pos[k]:P] <= W[:P] or k = -1)
 
@@ -345,14 +400,25 @@ sa_search(const int *s, const int *sa, const int *lcp, const int *llcp, const in
  */
 #if 1
 
-// lcp(A[a], W[b])
-static inline int
-get_lcp(const int *A, int N, const int *W, int P, 
+/*
+ * Return lcp of integer strings `A` and `B` at offsets `a` and `b`
+ *
+ *  Params:
+ *      A: A string as an array of int
+ *      Alen: Number of elements in A
+ *      B: A string as an array of int
+ *      Blen: Number of elements in B
+ *      a: Offset to scan from in A
+ *     b: Offset to scan from in B
+ */
+static inline
+int
+get_lcp(const int *A, int Alen, const int *B, int Blen,
         int a, int b) {
     int lcp = 0;
-    int d = Min(N - a, P - b);
+    int d = Min(Alen - a, Blen - b);
     for (lcp = 0; lcp < d; lcp++) {
-        if (A[a + lcp] != W[b + lcp]) {
+        if (A[a + lcp] != B[b + lcp]) {
             break;
         }
     }
@@ -361,8 +427,9 @@ get_lcp(const int *A, int N, const int *W, int P,
 
 // W[i] <= A[Pos[j] + k]
 // comp2 = W[a] - A[Pos[b] + c]
-static inline int
-comp2(const int *A, const int *Pos, int N, const int *W, int P, 
+static inline
+int
+comp2(const int *A, const int *Pos, int N, const int *W, int P,
       int a, int b, int c) {
     int pos = Pos[b];
     int m = Min(N - pos, P);
@@ -397,7 +464,7 @@ sa_search_lw(const int *A, const int *Pos, const int *Lcp, const int *Rcp,
         R = N - 1;
         while (R - L > 1) {
             M = (L + R) / 2;
-            //printf("LW: %3d: [%3d %3d] [%3d %3d] %d %d\n", 
+            //printf("LW: %3d: [%3d %3d] [%3d %3d] %d %d\n",
             //       M, L, R, Lcp[M], Rcp[M], b, r);
             Assert(Lcp[M] >= 0);
             Assert(Rcp[M] >= 0);

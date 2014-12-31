@@ -56,7 +56,8 @@ void preprocess_rmq_2(const int *s, int n, int *rmq_lut) {
     }
 }
 
-int get_rmq_2(const int *s, int n, const int *rmq_lut, int i, int j) {
+int
+get_rmq_2(const int *s, int n, const int *rmq_lut, int i, int j) {
     int r = int(floor(sqrt(n)));
     int nr = (n + r - 1) / r;
 
@@ -101,7 +102,8 @@ int get_rmq_2(const int *s, int n, const int *rmq_lut, int i, int j) {
  * O(n log(n)) time and space construction
  * O(1) operation
  */
-void preprocess_rmq_3(const int *s, int n, int **rmq_lut) {
+void
+preprocess_rmq_3(const int *s, int n, int **rmq_lut) {
     int i, j;
 
     // initialize rmq_lut for the intervals with length 1
@@ -119,7 +121,8 @@ void preprocess_rmq_3(const int *s, int n, int **rmq_lut) {
     }
 }
 
-int get_rmq_3(const int *s, int n, int * const*rmq_lut, int i, int j) {
+int
+get_rmq_3(const int *s, int n, int * const*rmq_lut, int i, int j) {
     int k = int(log2(j - i + 1));
     int j1 = j - ipow(2, k) + 1;
 
@@ -154,7 +157,8 @@ void preprocess_rmq_3(const int *s, int n, int **rmq_lut) {
 * tree[n]
 *
 */
-void compute_tree(const int *s, int n, int *tree) {
+void
+compute_tree(const int *s, int n, int *tree) {
     int *st = new int[n];
     int i, k, top = -1;
 
@@ -188,7 +192,7 @@ void compute_tree(const int *s, int n, int *tree) {
     //the tree, so it has no father
     tree[st[0]] = -1;
     cout << "   tree[" << st[0] << "]=" << -1 << ",v=*" << endl;;
-    
+
     delete[] st;
 }
 
@@ -196,7 +200,8 @@ void compute_tree(const int *s, int n, int *tree) {
 // http://wcipeg.com/wiki/Cartesian_tree
 // http://www3.cs.stonybrook.edu/~bender/newpub/BenderFa00-lca.pdf
 // http://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-851-advanced-data-structures-spring-2012/calendar-and-notes/MIT6_851S12_L15.pdf 2.1.1
-Node *compute_tree2(const int *s, int n) {
+Node *
+compute_tree2(const int *s, int n) {
     int i;
 
     Node *tree = new Node[n];
@@ -226,7 +231,7 @@ Node *compute_tree2(const int *s, int n) {
            tree[last]._right = i;
            tree[i]._parent = last;
            cout << "B ";
-        } else {                            // Make i last's right child and last's right child i's left child 
+        } else {                            // Make i last's right child and last's right child i's left child
             tree[tree[last]._right]._parent = i;
             tree[i]._left = tree[last]._right;
             tree[i]._parent = last;
@@ -238,7 +243,7 @@ Node *compute_tree2(const int *s, int n) {
         print_node(last, tree[last]);
         print_node(root, tree[root]);
         cout << endl;
-        
+
         Assert(tree[i]._parent == -1 || tree[i]._parent != tree[i]._left);
         Assert(tree[i]._parent == -1 || tree[i]._parent != tree[i]._right);
         Assert(tree[i]._left == -1 || tree[i]._left != tree[i]._right);
@@ -246,8 +251,6 @@ Node *compute_tree2(const int *s, int n) {
     }
     return tree;
 }
-
-
 
 int
 test_rmq_3(const int *s, int n, int i, int j, int rmq_ij) {
@@ -281,8 +284,9 @@ test_compute_tree(const int *s, int n) {
 #endif
 }
 
-bool test_rmq() {
-#if 1
+bool
+test_rmq() {
+#if 0
     for (int k = 1; k < 1000; k++) {
         int **rmq_lut = new2(k, 10);
         delete2(rmq_lut, k);
@@ -295,13 +299,12 @@ bool test_rmq() {
     int *s = new int[n];
     for (int k = 0; k < n; k++) {
         s[k] = 100 + (k + n / 2) % n;
-        //s[k] = k;
     }
 #else
     int s[] = { 2, 4, 3, 1, 6, 7, 8, 9, 1, 7 };
 #endif
     printV(s, n, "s");
-    //test_compute_tree(s, n);
+    test_compute_tree(s, n);
 
     for (int i = 0; i <= 3 * n / 2; i++) {
         for (int j = i; j < n; j++) {

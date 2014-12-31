@@ -20,7 +20,8 @@ bool test_rmq();
 void test_compute_tree(const int *s, int n);
 
 
-bool isPermutation(const int *SA, int n) {
+bool
+isPermutation(const int *SA, int n) {
     bool *seen = new bool[n];
     for (int i = 0; i < n; i++) seen[i] = 0;
     for (int i = 0; i < n; i++) seen[SA[i]] = 1;
@@ -28,7 +29,8 @@ bool isPermutation(const int *SA, int n) {
     return 1;
 }
 
-bool sleq(const int *s1, const int *s2) {
+bool
+sleq(const int *s1, const int *s2) {
 #if 0
     if (s1[0] < s2[0]) return 1;
     if (s1[0] > s2[0]) return 0;
@@ -52,7 +54,8 @@ isSorted(const int *SA, const int *s, int n) {
     return true;
 }
 
-static double
+static
+double
 test_one(const int *s, int n, int b, bool do_check, int *SA, int *lcp, int *llcp, int *rlcp) {
 
     cout << "-------------------\n";
@@ -92,7 +95,6 @@ test_one(const int *s, int n, int b, bool do_check, int *SA, int *lcp, int *llcp
 
     return duration;
 }
-
 
 double
 test_n_b(int n, int b) {
@@ -210,7 +212,7 @@ int main(int argc, char **argv) {
     //int s1[] = {2,1,3,1,3,1,0,0,0}; // banana
     //int s2[] = {0,0,0,0,0,0,0,0,0};
 
-#if 0
+#if 1
     test_rmq();
 #endif
 
